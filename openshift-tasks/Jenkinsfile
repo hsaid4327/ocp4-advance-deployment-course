@@ -46,10 +46,11 @@ pipeline {
         checkout scm
         echo "The code has been checked out"
 
-        dir('openshift-tasks') {
-          echo "The directory has been changed"
-        }
-         script {
+        // dir('openshift-tasks') {
+         // echo "The directory has been changed"
+       // }
+        sh 'cd openshift-tasks' 
+        script {
             def pom = readMavenPom file: 'pom.xml'
             def version = pom.version
 
