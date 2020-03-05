@@ -1,6 +1,7 @@
 // This is a Declarative Jenkinsfile to be used in the homework
 // It should map very well to what you learned in class.
 // Implement the sections marked with "TBD:"
+def GUID = "b63e"
 
 pipeline {
   agent {
