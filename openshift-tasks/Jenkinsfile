@@ -69,10 +69,13 @@ pipeline {
     // Build the Tasks Application in the directory 'openshift-tasks'
     stage('Build war') {
       steps {
-        dir('openshift-tasks') {
-          echo "Building version ${devTag}"
-        }
+        sh 'cd openshift-tasks' 
       }
+     script {
+          sh "${mvnCmd} clean package -DskipTests=true"
+
+          }
+
     }
 
     // Using Maven run the unit tests
@@ -80,8 +83,7 @@ pipeline {
       steps {
         dir('openshift-tasks') {
           echo "Running Unit Tests"
-
-        // TBD: Execute Unit Tests
+          sh "${mvnCmd} test"
 
         }
       }
