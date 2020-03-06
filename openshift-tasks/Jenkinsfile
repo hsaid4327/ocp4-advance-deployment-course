@@ -46,9 +46,10 @@ pipeline {
         checkout scm
         echo "The code has been checked out"
 
-        // dir('openshift-tasks') {
-         // echo "The directory has been changed"
-       // }
+            echo "The current dirctory is"
+            echo "***********************************"
+            sh 'pwd'
+            sh 'ls -lart'
         script {
             echo "The current dirctory is"
             echo "***********************************"
