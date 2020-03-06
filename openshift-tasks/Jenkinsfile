@@ -46,16 +46,8 @@ pipeline {
         checkout scm
         echo "The code has been checked out"
 
-            echo "The current dirctory is"
-            echo "***********************************"
-            sh 'pwd'
-            sh 'ls -lart'
         script {
-            echo "The current dirctory is"
-            echo "***********************************"
-            sh 'ls -lart'
-            sh 'cd openshift-tasks' 
-            def pom = readMavenPom file: 'pom.xml'
+            def pom = readMavenPom file: './openshift-tasks/pom.xml'
             def version = pom.version
 
             // Set the tag for the development image: version + build number
@@ -64,7 +56,7 @@ pipeline {
             prodTag = "${version}"
 
             // Patch Source artifactId to include GUID
-            sh "sed -i 's/GUID/${GUID}/g' ./pom.xml"
+            sh "sed -i 's/GUID/${GUID}/g' ./openshift-tasks/pom.xml"
           }
 
       }
@@ -74,9 +66,8 @@ pipeline {
     stage('Build war') {
       steps {
         script {
-        sh 'cd openshift-tasks' 
-        
-        sh "${mvnCmd} clean package -DskipTests=true"
+         sh '''cd openshift-tasks
+         ${mvnCmd} clean package -DskipTests=true''' 
        }
       }
 
