@@ -50,7 +50,9 @@ pipeline {
          // echo "The directory has been changed"
        // }
         script {
-
+            echo "The current dirctory is"
+            echo "***********************************"
+            sh 'ls -lart'
             sh 'cd openshift-tasks' 
             def pom = readMavenPom file: 'pom.xml'
             def version = pom.version
