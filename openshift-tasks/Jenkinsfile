@@ -69,12 +69,11 @@ pipeline {
     // Build the Tasks Application in the directory 'openshift-tasks'
     stage('Build war') {
       steps {
-        sh 'cd openshift-tasks' 
-      }
-     script {
-          sh "${mvnCmd} clean package -DskipTests=true"
 
-          }
+        sh 'cd openshift-tasks' 
+        
+        sh "${mvnCmd} clean package -DskipTests=true"
+      }
 
     }
 
