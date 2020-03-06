@@ -68,6 +68,7 @@ def activeApp   = ""
     // Using Maven call SonarQube for Code Analysis
     stage('Code Analysis') {
       steps {
+         echo "code analysis"
        
       //   sh '''cd openshift-tasks
         // ${mvnCmd} sonar:sonar -Dsonar.host.url=http://homework-sonarqube.apps.shared.na.openshift.opentlc.com/ -Dsonar.projectName=${JOB_BASE_NAME} -Dsonar.projectVersion=${devTag}''' 
