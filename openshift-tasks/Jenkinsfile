@@ -1,17 +1,9 @@
-// This is a Declarative Jenkinsfile to be used in the homework
-// It should map very well to what you learned in class.
-// Implement the sections marked with "TBD:"
 def GUID = "b63e"
-// Set variable globally to be available in all stages
-// Set Maven command to always include Nexus Settings
 def mvnCmd      = "mvn -s ./nexus_settings.xml"
-// Set Development and Production Project Names
 def devProject  = "${GUID}-tasks-dev"
 def prodProject = "${GUID}-tasks-prod"
 imageName   = "${GUID}-tasks"
-// Set the tag for the development image: version + build number
 def devTag      = "0.0-0"
-// Set the tag for the production image: version
 def prodTag     = "0.0"
 def destApp     = "tasks-green"
 def activeApp   = ""
@@ -47,10 +39,8 @@ pipeline {
     // Build the Tasks Application in the directory 'openshift-tasks'
     stage('Build war') {
       steps {
-        script {
          sh '''cd openshift-tasks
          ${mvnCmd} clean package -DskipTests=true''' 
-       }
       }
 
     }
@@ -58,11 +48,9 @@ pipeline {
     // Using Maven run the unit tests
     stage('Unit Tests') {
       steps {
-        script {
 
          sh '''cd openshift-tasks
          ${mvnCmd} test''' 
-        }
       }
     }
     // Using Maven call SonarQube for Code Analysis
