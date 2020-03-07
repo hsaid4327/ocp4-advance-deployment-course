@@ -118,7 +118,7 @@ def activeApp   = ""
           def configmap = openshift.create('configmap', 'tasks-config', '--from-file=./openshift-tasks/configuration/application-users.properties', '--from-file=./openshift-tasks/configuration/application-roles.properties')
 
           // Deploy the development application.
-          sh 'oc set env dc/tasks VERSION="${devTag} (tasks-dev)"'
+          sh 'oc set env dc/tasks VERSION="${devTag} (tasks-dev)" -n ${devProject}'
           openshift.selector("dc", "tasks").rollout().latest();
 
           // Wait for application to be deployed
@@ -181,7 +181,7 @@ def activeApp   = ""
                   openshift.selector("configmap", "${destApp}-config").delete()
                   def configmap = openshift.create("configmap", "${destApp}-config", "--from-file=./openshift-tasks/configuration/application-users.properties", "--from-file=./openshift-tasks/configuration/application-roles.properties" )
         
-                    sh 'oc set env dc/tasks VERSION="${prodTag} (tasks-dev)"'
+                    sh 'oc set env dc/tasks VERSION="${prodTag} (tasks-dev)" -n ${prodProject}'
                   // Deploy the inactive application.
                   openshift.selector("dc", "${destApp}").rollout().latest();
         
