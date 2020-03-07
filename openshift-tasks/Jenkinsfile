@@ -96,7 +96,7 @@ def activeApp   = ""
               openshift.withCluster() {
                 openshift.withProject("${devProject}") {
                   openshift.selector("bc", "tasks").startBuild("--from-file=./openshift-tasks/target/openshift-tasks.war", "--wait=true")
-                  openshift.tag("tasks:latest", "tasks:${devTag}")
+                  openshift.tag("${GUID}-tasks:latest", "${GUID}-tasks:${devTag}")
         
               }
            }
@@ -111,7 +111,7 @@ def activeApp   = ""
       // Update the Image on the Development Deployment Config
       openshift.withCluster() {
         openshift.withProject("${devProject}") {
-          openshift.set("image", "dc/tasks", "tasks=image-registry.openshift-image-registry.svc:5000/${devProject}/tasks:${devTag}")
+          openshift.set("image", "dc/tasks", "tasks=image-registry.openshift-image-registry.svc:5000/${devProject}/${GUID}-tasks:${devTag}")
 
 
           openshift.selector('configmap', 'tasks-config').delete()
@@ -142,12 +142,12 @@ def activeApp   = ""
       steps {
            echo "Copy image to Nexus Container Registry"
             script {
-              sh "skopeo copy --src-tls-verify=false --dest-tls-verify=false --src-creds openshift:\$(oc whoami -t) --dest-creds admin:redhat docker://image-registry.openshift-image-registry.svc.cluster.local:5000/${devProject}/tasks:${devTag} docker://homework-nexus-registry.gpte-hw-cicd.svc.cluster.local:5000/tasks:${devTag}"
+              sh "skopeo copy --src-tls-verify=false --dest-tls-verify=false --src-creds openshift:\$(oc whoami -t) --dest-creds admin:redhat docker://image-registry.openshift-image-registry.svc.cluster.local:5000/${devProject}/${GUID}-tasks:${devTag} docker://homework-nexus-registry.gpte-hw-cicd.svc.cluster.local:5000/${GUID}-tasks:${devTag}"
         
               // Tag the built image with the production tag.
               openshift.withCluster() {
                 openshift.withProject("${prodProject}") {
-                  openshift.tag("${devProject}/tasks:${devTag}", "${devProject}/tasks:${prodTag}")
+                  openshift.tag("${devProject}/${GUID}-tasks:${devTag}", "${devProject}/${GUID}-tasks:${prodTag}")
                 }
               }
             }
@@ -173,7 +173,7 @@ def activeApp   = ""
                   // Update the Image on the Production Deployment Config
                   def dc = openshift.selector("dc/${destApp}").object()
         
-                  dc.spec.template.spec.containers[0].image="image-registry.openshift-image-registry.svc:5000/${devProject}/tasks:${prodTag}"
+                  dc.spec.template.spec.containers[0].image="image-registry.openshift-image-registry.svc:5000/${devProject}/${GUID}-tasks:${prodTag}"
         
                   openshift.apply(dc)
         
