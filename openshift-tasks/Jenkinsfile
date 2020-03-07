@@ -1,12 +1,3 @@
-//def GUID = "b63e"
-//def mvnCmd      = "mvn -s ./nexus_settings.xml"
-//def devProject  = "${GUID}-tasks-dev"
-//def prodProject = "${GUID}-tasks-prod"
-//imageName   = "${GUID}-tasks"
-//def devTag      = "0.0-0"
-//def prodTag     = "0.0"
-//def destApp     = "tasks-green"
-//def activeApp   = ""
 
 pipeline {
     agent {
@@ -15,15 +6,15 @@ pipeline {
   }
  environment {
  
-def GUID = "b63e"
-def mvnCmd      = "mvn -s ./nexus_settings.xml"
-def devProject  = "${GUID}-tasks-dev"
-def prodProject = "${GUID}-tasks-prod"
-imageName   = "${GUID}-tasks"
-def devTag      = "0.0-0"
-def prodTag     = "0.0"
-def destApp     = "tasks-green"
-def activeApp   = ""
+   def GUID = "b63e"
+   def mvnCmd      = "mvn -s ./nexus_settings.xml"
+   def devProject  = "${GUID}-tasks-dev"
+   def prodProject = "${GUID}-tasks-prod"
+   imageName   = "${GUID}-tasks"
+   def devTag      = "0.0-0"
+   def prodTag     = "0.0"
+   def destApp     = "tasks-green"
+   def activeApp   = ""
  }
   stages {
     // Checkout Source Code.
@@ -35,12 +26,12 @@ def activeApp   = ""
         script {
             def pom = readMavenPom file: './openshift-tasks/pom.xml'
             def version = pom.version
-
+            echo "************************ pom version is : ${version}*****************************"
             // Set the tag for the development image: version + build number
             devTag  = "${version}-" + currentBuild.number
             // Set the tag for the production image: version
             prodTag = "${version}"
-
+            echo "************************ prodTag is ${prodTag}*********************"
             // Patch Source artifactId to include GUID
             sh "sed -i 's/GUID/${GUID}/g' ./openshift-tasks/pom.xml"
           }
@@ -159,7 +150,7 @@ def activeApp   = ""
     // -------------------------------------
     stage('Blue/Green Production Deployment') {
       steps {
-                  echo "Blue/Green Deployment"
+            echo "Blue/Green Deployment"
             script {
               openshift.withCluster() {
                 openshift.withProject("${prodProject}") {
@@ -181,7 +172,7 @@ def activeApp   = ""
                   openshift.selector("configmap", "${destApp}-config").delete()
                   def configmap = openshift.create("configmap", "${destApp}-config", "--from-file=./openshift-tasks/configuration/application-users.properties", "--from-file=./openshift-tasks/configuration/application-roles.properties" )
         
-                    sh 'oc set env dc/tasks VERSION="${prodTag} (tasks-dev)" -n ${prodProject}'
+                    sh 'oc set env dc/${destApp} VERSION="${prodTag} (tasks-dev)" -n ${prodProject}'
                   // Deploy the inactive application.
                   openshift.selector("dc", "${destApp}").rollout().latest();
         
