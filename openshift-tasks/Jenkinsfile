@@ -79,8 +79,8 @@ def activeApp   = ""
     stage('Publish to Nexus') {
       steps {
           echo "Publish to Nexus"
-         sh '''cd openshift-tasks
-         ${mvnCmd} deploy -DskipTests=true -DaltDeploymentRepository=nexus::default::http://homework-nexus.gpte-hw-cicd.svc.cluster.local:8081/repository/releases''' 
+       //  sh '''cd openshift-tasks
+       //  ${mvnCmd} deploy -DskipTests=true -DaltDeploymentRepository=nexus::default::http://homework-nexus.gpte-hw-cicd.svc.cluster.local:8081/repository/releases''' 
 
         }
       }
