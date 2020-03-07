@@ -113,7 +113,7 @@ pipeline {
           //sh 'oc set env dc/tasks VERSION="${devTag} (tasks-dev)" -n ${devProject}'
           def dcdev = openshift.selector("dc", "tasks").object()
          // openshift.patch("dc/tasks",'\'{"spec":{"containers":[{"env":[{"name":"VERSION","value":"${devTag}"}]}]}}\'')
-         dcdev.spec.template.spec.containers.env[0].value="${devTag}"
+         dcdev.spec.template.spec.containers[0].env[0].value="${devTag}"
          openshift.apply(dcdev)
 
           openshift.selector("dc", "tasks").rollout().latest();
