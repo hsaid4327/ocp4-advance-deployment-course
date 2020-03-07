@@ -111,9 +111,10 @@ pipeline {
 
           // Deploy the development application.
           //sh 'oc set env dc/tasks VERSION="${devTag} (tasks-dev)" -n ${devProject}'
-          def dc = openshift.selector("dc", "tasks").object()
+          def dcdev = openshift.selector("dc", "tasks").object()
          // openshift.patch("dc/tasks",'\'{"spec":{"containers":[{"env":[{"name":"VERSION","value":"${devTag}"}]}]}}\'')
-         dc.spec.template.spec.containers["env"][0].value="${devTag}"
+         dcdev.spec.template.spec.containers.env[0].value="${devTag}"
+         openshift.apply(dcdev)
 
           openshift.selector("dc", "tasks").rollout().latest();
 
@@ -167,11 +168,11 @@ pipeline {
                   echo "Destination Application: " + destApp
         
                   // Update the Image on the Production Deployment Config
-                  def dc = openshift.selector("dc/${destApp}").object()
+                  def dcprod = openshift.selector("dc/${destApp}").object()
                   //dc.patch('\'{"spec":{"containers":[{"env":[{"name":"VERSION","value":"${prodTag}"}]}]}}\'') 
-                  dc.spec.template.spec.containers[0].image="image-registry.openshift-image-registry.svc:5000/${devProject}/${GUID}-tasks:${prodTag}"
-                  dc.spec.template.spec.containers["env"][0].value="${prodTag}"
-                  openshift.apply(dc)
+                  dcprod.spec.template.spec.containers[0].image="image-registry.openshift-image-registry.svc:5000/${devProject}/${GUID}-tasks:${prodTag}"
+                  dcprod.spec.template.spec.containers["env"][0].value="${prodTag}"
+                  openshift.apply(dcprod)
         
                   // Update Config Map in change config files changed in the source
                   openshift.selector("configmap", "${destApp}-config").delete()
