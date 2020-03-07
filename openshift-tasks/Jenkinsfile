@@ -120,7 +120,7 @@ pipeline {
 
           // Wait for application to be deployed
          // def dc = openshift.selector("dc", "tasks").object()
-          def dc_version = dc.status.latestVersion
+          def dc_version = dcdev.status.latestVersion
           def rc = openshift.selector("rc", "tasks-${dc_version}").object()
 
           echo "Waiting for ReplicationController tasks-${dc_version} to be ready"
@@ -171,7 +171,7 @@ pipeline {
                   def dcprod = openshift.selector("dc/${destApp}").object()
                   //dc.patch('\'{"spec":{"containers":[{"env":[{"name":"VERSION","value":"${prodTag}"}]}]}}\'') 
                   dcprod.spec.template.spec.containers[0].image="image-registry.openshift-image-registry.svc:5000/${devProject}/${GUID}-tasks:${prodTag}"
-                  dcprod.spec.template.spec.containers["env"][0].value="${prodTag}"
+                  dcprod.spec.template.spec.containers[0].env[0].value="${prodTag}"
                   openshift.apply(dcprod)
         
                   // Update Config Map in change config files changed in the source
