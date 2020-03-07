@@ -53,8 +53,8 @@ pipeline {
     stage('Unit Tests') {
       steps {
         echo "Running maven tests"
-       //  sh '''cd openshift-tasks
-       //  ${mvnCmd} test''' 
+         sh '''cd openshift-tasks
+         ${mvnCmd} test''' 
       }
     }
     // Using Maven call SonarQube for Code Analysis
@@ -62,8 +62,8 @@ pipeline {
       steps {
          echo "code analysis"
        
-      //   sh '''cd openshift-tasks
-        // ${mvnCmd} sonar:sonar -Dsonar.host.url=http://homework-sonarqube.apps.shared.na.openshift.opentlc.com/ -Dsonar.projectName=${JOB_BASE_NAME} -Dsonar.projectVersion=${devTag}''' 
+      sh '''cd openshift-tasks
+         ${mvnCmd} sonar:sonar -Dsonar.host.url=http://homework-sonarqube.apps.shared.na.openshift.opentlc.com/ -Dsonar.projectName=${JOB_BASE_NAME} -Dsonar.projectVersion=${devTag}''' 
        
       }
     }
@@ -71,8 +71,8 @@ pipeline {
     stage('Publish to Nexus') {
       steps {
           echo "Publish to Nexus"
-       //  sh '''cd openshift-tasks
-       //  ${mvnCmd} deploy -DskipTests=true -DaltDeploymentRepository=nexus::default::http://homework-nexus.gpte-hw-cicd.svc.cluster.local:8081/repository/releases''' 
+       sh '''cd openshift-tasks
+       ${mvnCmd} deploy -DskipTests=true -DaltDeploymentRepository=nexus::default::http://homework-nexus.gpte-hw-cicd.svc.cluster.local:8081/repository/releases''' 
 
         }
       }
@@ -110,13 +110,10 @@ pipeline {
           def configmap = openshift.create('configmap', 'tasks-config', '--from-file=./openshift-tasks/configuration/application-users.properties', '--from-file=./openshift-tasks/configuration/application-roles.properties')
 
           // Deploy the development application.
-          //sh 'oc set env dc/tasks VERSION="${devTag} (tasks-dev)" -n ${devProject}'
           def dcdev = openshift.selector("dc", "tasks").object()
-         // openshift.patch("dc/tasks",'\'{"spec":{"containers":[{"env":[{"name":"VERSION","value":"${devTag}"}]}]}}\'')
-         dcdev.spec.template.spec.containers[0].env[0].value="${devTag}"
+         dcdev.spec.template.spec.containers[0].env[0].value="${devTag} (task-dev)"
          openshift.apply(dcdev)
-
-          openshift.selector("dc", "tasks").rollout().latest();
+         openshift.selector("dc", "tasks").rollout().latest();
 
           // Wait for application to be deployed
          // def dc = openshift.selector("dc", "tasks").object()
@@ -169,16 +166,14 @@ pipeline {
         
                   // Update the Image on the Production Deployment Config
                   def dcprod = openshift.selector("dc/${destApp}").object()
-                  //dc.patch('\'{"spec":{"containers":[{"env":[{"name":"VERSION","value":"${prodTag}"}]}]}}\'') 
                   dcprod.spec.template.spec.containers[0].image="image-registry.openshift-image-registry.svc:5000/${devProject}/${GUID}-tasks:${prodTag}"
-                  dcprod.spec.template.spec.containers[0].env[0].value="${prodTag}"
+                  dcprod.spec.template.spec.containers[0].env[0].value="${prodTag} (task-prod)"
                   openshift.apply(dcprod)
         
                   // Update Config Map in change config files changed in the source
                   openshift.selector("configmap", "${destApp}-config").delete()
                   def configmap = openshift.create("configmap", "${destApp}-config", "--from-file=./openshift-tasks/configuration/application-users.properties", "--from-file=./openshift-tasks/configuration/application-roles.properties" )
         
-                   // sh 'oc set env dc/${destApp} VERSION="${prodTag} (tasks-prod)" -n ${prodProject}'
                   // Deploy the inactive application.
                   openshift.selector("dc", "${destApp}").rollout().latest();
         
